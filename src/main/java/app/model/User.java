@@ -6,6 +6,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import java.util.List;
 import java.util.Set;
 
 import javax.persistence.CascadeType;
@@ -51,9 +52,14 @@ public class User {
 
     @Column(name = "active")
     private Integer active;
+
     @ManyToMany(cascade = CascadeType.ALL)
     @JoinTable(name = "user_role", joinColumns = @JoinColumn(name = "id"), inverseJoinColumns = @JoinColumn(name = "role_id"))
     private Set<Role> roles;
+
+	@ManyToMany(cascade = CascadeType.ALL)
+	@JoinTable(name = "user_file", joinColumns = @JoinColumn(name = "id"), inverseJoinColumns = @JoinColumn(name = "file_id"))
+	private List<Files> files;
 
 	
 	public String getConfirmationToken() {
@@ -120,4 +126,11 @@ public class User {
     public Set<Role> getRoles() { return roles; }
 
     public void setRoles(Set<Role> roles) { this.roles = roles; }
+
+	public List<Files> getFiles() { return files; }
+
+	public void setFiles(List<Files> files) { this.files = files; }
+
+	public void addFile( Files file ) { getFiles().add( file );}
+
 }
