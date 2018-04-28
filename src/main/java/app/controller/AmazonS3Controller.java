@@ -6,6 +6,8 @@ import app.repository.FileRepository;
 import app.repository.UserRepository;
 import app.service.AmazonS3Service;
 import app.service.UserService;
+import com.amazonaws.services.s3.model.S3Object;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.core.Authentication;
@@ -14,6 +16,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -66,9 +70,30 @@ public class AmazonS3Controller {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         User user = userService.findByEmail(auth.getName());
         user.addFile(img);
-        //user.setFiles(new HashSet<Files>(Arrays.asList(img)));
         userRepository.save(user);
         return "done";
+    }
+    @RequestMapping(value = "/download", method = RequestMethod.GET)
+    public String download() {
+        ObjectMapper mapper = new ObjectMapper();
+        S3Object obj = s3client.downloadFileFromS3("1524315673_skull.obj");
+        try {
+            mapper.writeValue(new File("../1524315673_skull.json"), obj);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return "download";
+    }
+
+    @RequestMapping(value = "/viewer_obj", method = RequestMethod.GET)
+    public String viewer_obj() {
+        return "viewer_obj";
+    }
+
+    @RequestMapping(value = "/viewer_obj_mlt", method = RequestMethod.GET)
+    public String viewer_mlt() {
+        return "viewer_obj_mlt";
     }
 
     /*@DeleteMapping("/deleteFile")

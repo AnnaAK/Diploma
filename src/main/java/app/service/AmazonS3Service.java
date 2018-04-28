@@ -10,10 +10,7 @@ import com.amazonaws.auth.AWSCredentials;
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3Client;
-import com.amazonaws.services.s3.model.CannedAccessControlList;
-import com.amazonaws.services.s3.model.DeleteObjectRequest;
-import com.amazonaws.services.s3.model.GeneratePresignedUrlRequest;
-import com.amazonaws.services.s3.model.PutObjectRequest;
+import com.amazonaws.services.s3.model.*;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -49,36 +46,41 @@ public class AmazonS3Service {
             String key = Instant.now().getEpochSecond() + "_" + fileToUpload.getName();
             s3client.putObject(new PutObjectRequest(bucketName, key, fileToUpload));
 
-            /* get signed URL (valid for one year) */
-            GeneratePresignedUrlRequest generatePresignedUrlRequest = new GeneratePresignedUrlRequest(bucketName, key);
-            generatePresignedUrlRequest.setMethod(HttpMethod.GET);
-            generatePresignedUrlRequest.setExpiration(DateTime.now().plusYears(1).toDate());
-
             //URL signedUrl = s3client.generatePresignedUrl(generatePresignedUrlRequest);
             String signedUrl = endpointUrl + "/" + bucketName + "/" + key;
 
             return new Files(key, signedUrl, fileToUpload.getName());
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return null;
     }
 
     private File convertFromMultiPart(MultipartFile multipartFile)
-        throws IOException {
+            throws IOException {
 
-            File file = new File(multipartFile.getOriginalFilename());
-            file.createNewFile();
-            FileOutputStream fos = new FileOutputStream(file);
-            fos.write(multipartFile.getBytes());
-            fos.close();
+        File file = new File(multipartFile.getOriginalFilename());
+        file.createNewFile();
+        FileOutputStream fos = new FileOutputStream(file);
+        fos.write(multipartFile.getBytes());
+        fos.close();
 
-            return file;
-        }
+        return file;
+    }
 
-    public void deleteImageFromS3(Files customerImage){
+    public void deleteImageFromS3(Files customerImage) {
         s3client.deleteObject(new DeleteObjectRequest(bucketName, customerImage.getKey()));
     }
 
+    public S3Object downloadFileFromS3(String key) {
+        try {
+            S3Object s3object = s3client.getObject(new GetObjectRequest(
+                    bucketName, key));
+            return s3object;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
 }

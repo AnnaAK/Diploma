@@ -92,7 +92,7 @@ public class RegisterController {
 		User user = userService.findByConfirmationToken(token);
 			
 		if (user == null) { // No token found in DB
-			modelAndView.addObject("invalidToken", "Oops!  This is an invalid confirmation link.");
+			modelAndView.addObject("invalidToken", "This is an invalid confirmation link.");
 		} else { // Token found
 			modelAndView.addObject("confirmationToken", user.getConfirmationToken());
 		}
