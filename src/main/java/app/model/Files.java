@@ -27,6 +27,10 @@ public class Files {
     private String link;
     @Column(name="file_key")
     private String key;
+    @Column(name="texture_url")
+    private String texture_link;
+    @Column(name="texture_key")
+    private String texture_key;
 
     public int getId() {
         return id;
@@ -51,5 +55,17 @@ public class Files {
     }
     public void setKey(String key) {
         this.key = key;
+    }
+    public String getTLink() {
+        return texture_link;
+    }
+    public void setTLink(String texture_link) {
+        this.texture_link = texture_link;
+    }
+    public String getTKey() {
+        return texture_key;
+    }
+    public void setTKey(String texture_key) {
+        this.texture_key = texture_key;
     }
 }

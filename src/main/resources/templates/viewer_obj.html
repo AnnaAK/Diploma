@@ -1,13 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
 	<head>
-		<title>three.js webgl - loaders - OBJ loader</title>
+		<title>OBJ loader</title>
 		<meta charset="utf-8">
 		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
 		<style>
 			body {
 				font-family: Monospace;
-				background-color: #000;
+				background-color: #F6F8FA;
 				color: #fff;
 				margin: 0px;
 				overflow: hidden;
@@ -27,7 +27,7 @@
                 Detector.addGetWebGLMessage();
             }
 
-            var mouseX = 0, mouseY = 0;
+            //var mouseX = 0, mouseY = 0;
             var windowHalfX = window.innerWidth / 2;
             var windowHalfY = window.innerHeight / 2;
 
@@ -35,12 +35,15 @@
 
 			var camera, scene, renderer;
 
+            var file = getURLParameter('file');
+            var f_texture = getURLParameter('f_texture');
 
-			init();
+
+			init(file, f_texture);
 			animate();
 
 
-			function init() {
+			function init(file, f_texture) {
 
 				container = document.createElement( 'div' );
 				document.body.appendChild( container );
@@ -69,7 +72,8 @@
 				};
 
 				var textureLoader = new THREE.TextureLoader( manager );
-				var texture = textureLoader.load( 'UV_Grid_Sm.jpg' );
+                var texture = textureLoader.load( f_texture );
+				//var texture = textureLoader.load( 'https://s3.amazonaws.com/medicappstorage/1524918806_UV_Grid_Sm.jpg' );
 
 				// model
 
@@ -84,7 +88,7 @@
 				};
 
 				var loader = new THREE.OBJLoader( manager );
-				loader.load( 'body.obj', function ( object ) {
+				loader.load( file, function ( object ) {
 
 					object.traverse( function ( child ) {
 
@@ -166,6 +170,10 @@
 				renderer.render( scene, camera );
 
 			}
+
+            function getURLParameter(name) {
+                return decodeURIComponent((new RegExp('[?|&]' + name + '=' + '([^&;]+?)(&|#|;|$)').exec(location.search) || [null, ''])[1].replace(/\+/g, '%20')) || "";
+            }
 
 		</script>
 

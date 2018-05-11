@@ -1,8 +1,10 @@
 package app.controller;
 
 import app.model.Files;
+import app.model.TextureFile;
 import app.model.User;
 import app.repository.FileRepository;
+import app.repository.TextureRepository;
 import app.repository.UserRepository;
 import app.service.AmazonS3Service;
 import app.service.UserService;
@@ -15,11 +17,10 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.ModelAndView;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
 
 @Controller
@@ -30,6 +31,10 @@ public class AmazonS3Controller {
     @Qualifier("fileRepository")
     @Autowired
     private FileRepository fileRepository;
+
+    @Qualifier("textureRepository")
+    @Autowired
+    private TextureRepository textureRepository;
 
     @Qualifier("userRepository")
     @Autowired
@@ -63,16 +68,48 @@ public class AmazonS3Controller {
     }
 
     @RequestMapping(value = "/upload", method = RequestMethod.POST)
-    public String uploadfun(@RequestParam("file") MultipartFile file){
+    public String uploadfun(@RequestParam("file") List<MultipartFile> files) {
+        for (MultipartFile file : files) {
+            String extension = s3client.getExtension(file);
+            //System.out.print(extension);
+            String texture = "";
 
-        Files img = s3client.saveFileToS3(file);
-        fileRepository.save(img);
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        User user = userService.findByEmail(auth.getName());
-        user.addFile(img);
-        userRepository.save(user);
+            if (extension.equals("mtl")) {
+                TextureFile t = s3client.saveTextureToS3(file);
+                textureRepository.save(t);
+                try {
+                    Files f = fileRepository.findFirstByName(t.getName());
+                    f.setTLink(t.getUrl());
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            } else if (extension.equals("obj")) {
+                Files img = s3client.saveFileToS3(file);
+                try {
+                    texture = textureRepository.findFirstByTname(img.getName()).getUrl();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                finally {
+                    img.setTLink(texture);
+                    fileRepository.save(img);
+                    Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+                    User user = userService.findByEmail(auth.getName());
+                    user.addFile(img);
+                    userRepository.save(user);
+                }
+            } else {
+                Files img = s3client.saveFileToS3(file);
+                fileRepository.save(img);
+                Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+                User user = userService.findByEmail(auth.getName());
+                user.addFile(img);
+                userRepository.save(user);
+            }
+        }
         return "done";
     }
+
     @RequestMapping(value = "/download", method = RequestMethod.GET)
     public String download() {
         ObjectMapper mapper = new ObjectMapper();
@@ -96,17 +133,17 @@ public class AmazonS3Controller {
         return "viewer_obj_mlt";
     }
 
-    /*@DeleteMapping("/deleteFile")
-    public String deleteFile(Files fileUrl) {
-        return this.s3client.deleteImageFromS3(fileUrl);
-    }*/
-}
-    /*@RequestMapping(value={"/storage/uploadfile"}, method = RequestMethod.POST)
-    public ModelAndView uploadfile(@RequestPart(value = "file") MultipartFile file){
+    @RequestMapping(value = {"/repo"}, method = RequestMethod.GET)
+    public ModelAndView repo() {
         ModelAndView modelAndView = new ModelAndView();
-        modelAndView.setViewName("storage");
-        s3client.uploadFile(file);
-        modelAndView.addObject("successMessage", "Your file has been upload!");
+        modelAndView.setViewName("repo");
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        User user = userService.findByEmail(auth.getName());
+        //List<Files> list = user.getFiles();
+        //System.out.print(list);
+        modelAndView.addObject("f_list", user.getFiles());
+
         return modelAndView;
-    }*/
+    }
+}
 

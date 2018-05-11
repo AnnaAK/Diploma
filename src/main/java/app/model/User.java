@@ -70,7 +70,6 @@ public class User {
 		this.confirmationToken = confirmationToken;
 	}
 
-
 	public int getId() {
 		return id;
 	}
@@ -131,6 +130,6 @@ public class User {
 
 	public void setFiles(List<Files> files) { this.files = files; }
 
-	public void addFile( Files file ) { getFiles().add( file );}
+	public void addFile(Files file) { getFiles().add(file);}
 
 }
