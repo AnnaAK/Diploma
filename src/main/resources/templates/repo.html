@@ -3,20 +3,48 @@
 <head>
 
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <link href="css/core.css" rel="stylesheet" media="screen" th:href="@{css/core.css}" />
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
     <title>Files</title>
 </head>
 
 <body>
-<h1>List</h1>
-<table>
-    <th:block th:each="file : ${f_list}">
-        <tr>
-            <td><a th:text="${file.name}" th:href="@{/viewer_obj(file=${file.getLink()},f_texture=${file.getTLink()})}">Title ...</a></td>
-            <td th:text="${file.link}">...</td>
-            <td th:text="${file.getTLink()}">...</td>
-        </tr>
-    </th:block>
-</table>
+<div th:replace="fragments/header :: header">
+    <div class="navbar navbar-inverse navbar-fixed-top">
+        <div class="container">
+            <div class="navbar-header">
+                <a class="navbar-brand" href="#">Static header</a>
+            </div>
+            <div class="navbar-collapse collapse">
+                <ul class="nav navbar-nav">
+                    <li class="active"><a href="#">Home</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+<br>
+<div class="container">
+    <h3>Files</h3>
+    <form th:action="@{/upload}" method="get">
+        <button class="btn btn-primary" type="Submit">Add file</button>
+    </form>
+</div>
+
+<br>
+<div class="container">
+    <ul class="list-group" th:block th:each="file : ${f_list}">
+        <li class="list-group-item" th:if="${file.getExtension()} == 'obj'">
+            <a th:text="${file.name}" th:href="@{/viewer_obj(file=${file.getLink()},f_texture=${file.getTLink()})}">Title ...</a>
+        </li>
+        <li class="list-group-item" th:if="${file.getExtension()} == 'mtl'">
+            <a th:text="${file.name}" th:href="@{/viewer_obj_mlt(file=${file.getLink()},f_texture=${file.getTLink()})}">Title ...</a>
+        </li>
+    </ul>
+</div>
+
 </body>
 </html>>
 

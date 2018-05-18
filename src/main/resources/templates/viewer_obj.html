@@ -1,181 +1,229 @@
 <!DOCTYPE html>
-<html lang="en">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org/">
 	<head>
 		<title>OBJ loader</title>
 		<meta charset="utf-8">
 		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
-		<style>
-			body {
-				font-family: Monospace;
-				background-color: #F6F8FA;
-				color: #fff;
-				margin: 0px;
-				overflow: hidden;
-			}
-		</style>
+		<link href="css/core.css" rel="stylesheet" media="screen" th:href="@{/css/core.css}" />
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
 	</head>
 
 	<body>
 
-		<script src="js/three.js"></script>
-		<script src="js/OBJLoader.js"></script>
-		<script src="js/OrbitControls.js"></script>
-		<script src="js/Detector.js"></script>
+	<div th:replace="fragments/header :: header">
+		<div class="navbar navbar-inverse navbar-fixed-top">
+			<div class="container">
+				<div class="navbar-header">
+					<a class="navbar-brand" href="#">Static header</a>
+				</div>
+				<div class="navbar-collapse collapse">
+					<ul class="nav navbar-nav">
+						<li class="active"><a href="#">Home</a></li>
+					</ul>
+				</div>
+			</div>
+		</div>
+	</div>
 
-		<script>
-            if (!Detector.webgl) {
-                Detector.addGetWebGLMessage();
-            }
+	<div class="tabbable">
+		<div class="container"><ul class="nav nav-tabs">
+			<li class="active"><a href="#tab1" data-toggle="tab">Demonstration</a></li>
+			<li><a href="#tab2" data-toggle="tab">Information</a></li>
+			<li><a href="#tab3" data-toggle="tab">Download</a></li>
+			<li><a href="#tab4" data-toggle="tab">Delete</a></li>
+		</ul>
+		</div>
+		<div class="tab-content">
+			<div class="tab-pane active" id="tab1">
+				<script src="js/three.js"></script>
+				<script src="js/OBJLoader.js"></script>
+				<script src="js/OrbitControls.js"></script>
+				<script src="js/Detector.js"></script>
 
-            //var mouseX = 0, mouseY = 0;
-            var windowHalfX = window.innerWidth / 2;
-            var windowHalfY = window.innerHeight / 2;
+				<script>
+                    if (!Detector.webgl) {
+                        Detector.addGetWebGLMessage();
+                    }
 
-			var container;
+                    //var mouseX = 0, mouseY = 0;
+                    var windowHalfX = window.innerWidth / 2;
+                    var windowHalfY = window.innerHeight / 2;
 
-			var camera, scene, renderer;
+                    var container;
 
-            var file = getURLParameter('file');
-            var f_texture = getURLParameter('f_texture');
+                    var camera, scene, renderer;
 
-
-			init(file, f_texture);
-			animate();
+                    var file = getURLParameter('file');
+                    var f_texture = getURLParameter('f_texture');
 
 
-			function init(file, f_texture) {
+                    init(file, f_texture);
+                    animate();
 
-				container = document.createElement( 'div' );
-				document.body.appendChild( container );
 
-                camera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, 1, 800 );
-                camera.position.z = 10;
+                    function init(file, f_texture) {
 
-				// scene
+                        container = document.createElement( 'div' );
+                        document.body.appendChild( container );
 
-				scene = new THREE.Scene();
+                        camera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, 1, 800 );
+                        camera.position.z = 10;
 
-				var ambientLight = new THREE.AmbientLight( 0xcccccc, 0.4 );
-				scene.add( ambientLight );
+                        // scene
 
-				var pointLight = new THREE.PointLight( 0xffffff, 0.8 );
-				camera.add( pointLight );
-				scene.add( camera );
+                        scene = new THREE.Scene();
 
-				// texture
+                        var ambientLight = new THREE.AmbientLight( 0xcccccc, 0.4 );
+                        scene.add( ambientLight );
 
-				var manager = new THREE.LoadingManager();
-				manager.onProgress = function ( item, loaded, total ) {
+                        var pointLight = new THREE.PointLight( 0xffffff, 0.8 );
+                        camera.add( pointLight );
+                        scene.add( camera );
 
-					console.log( item, loaded, total );
+                        // texture
 
-				};
+                        var manager = new THREE.LoadingManager();
+                        manager.onProgress = function ( item, loaded, total ) {
 
-				var textureLoader = new THREE.TextureLoader( manager );
-                var texture = textureLoader.load( f_texture );
-				//var texture = textureLoader.load( 'https://s3.amazonaws.com/medicappstorage/1524918806_UV_Grid_Sm.jpg' );
+                            console.log( item, loaded, total );
 
-				// model
-
-				var onProgress = function ( xhr ) {
-					if ( xhr.lengthComputable ) {
-						var percentComplete = xhr.loaded / xhr.total * 100;
-						console.log( Math.round(percentComplete, 2) + '% downloaded' );
-					}
-				};
-
-				var onError = function ( xhr ) {
-				};
-
-				var loader = new THREE.OBJLoader( manager );
-				loader.load( file, function ( object ) {
-
-					object.traverse( function ( child ) {
-
-						if ( child instanceof THREE.Mesh ) {
-
-							child.material.map = texture;
-
+                        };
+                        if (f_texture === ""){
+                            f_texture = "https://s3.amazonaws.com/medicappstorage/default_texture.png";
 						}
 
-					} );
+                        var textureLoader = new THREE.TextureLoader( manager );
+                        var texture = textureLoader.load( f_texture );
+                        console.log(texture);
 
-					scene.add( object );
-					//
-                    var pos = object.position;
-                    camera.position.set(pos.x, pos.y, 400);
-                    camera.lookAt(pos);
-                    var boxFrmScene = new THREE.Box3().setFromObject(scene);
-                    var height = Math.max(boxFrmScene.size().y, boxFrmScene.size().x);
-                    var fov = camera.fov * (Math.PI / 180);
-                    var distance = Math.abs(height / Math.sin(fov / 1.8));
-                    camera.position.set(pos.x , pos.y, distance + (height / 2));
-                    camera.updateProjectionMatrix();
+                        // model
 
-				}, onProgress, onError );
+                        var onProgress = function ( xhr ) {
+                            if ( xhr.lengthComputable ) {
+                                var percentComplete = xhr.loaded / xhr.total * 100;
+                                console.log( Math.round(percentComplete, 2) + '% downloaded' );
+                            }
+                        };
 
-				//
+                        var onError = function ( xhr ) {
+                        };
 
-                /* Renderer */
-                renderer = new THREE.WebGLRenderer();
-                renderer.setPixelRatio(window.devicePixelRatio);
-                renderer.setSize(window.innerWidth, window.innerHeight);
-                renderer.setClearColor(new THREE.Color("hsl(0, 0%, 10%)"));
-                container.appendChild(renderer.domElement);
-                //document.addEventListener( 'mousewheel', onDocumentMouseWheel, false );
+                        var loader = new THREE.OBJLoader( manager );
+                        loader.load( file, function ( object ) {
 
-                //
+                            object.traverse( function ( child ) {
 
-				window.addEventListener( 'resize', onWindowResize, false );
+                                if ( child instanceof THREE.Mesh ) {
 
-                /* Controls */
-                controls = new THREE.OrbitControls(camera, renderer.domElement);
-                controls.enableDamping = false;
-                controls.dampingFactor = 0.4;
-                controls.enableZoom = true;
+                                    child.material.map = texture;
+                                }
 
-			}
+                            } );
 
-			function onWindowResize() {
+                            scene.add( object );
 
-				windowHalfX = window.innerWidth / 2;
-				windowHalfY = window.innerHeight / 2;
+                            //
+                            var pos = object.position;
+                            camera.position.set(pos.x, pos.y, 400);
+                            camera.lookAt(pos);
+                            var boxFrmScene = new THREE.Box3().setFromObject(scene);
+                            var height = Math.max(boxFrmScene.size().y, boxFrmScene.size().x);
+                            var fov = camera.fov * (Math.PI / 180);
+                            var distance = Math.abs(height / Math.sin(fov / 1.8));
+                            camera.position.set(pos.x , pos.y, distance + (height / 2));
+                            camera.updateProjectionMatrix();
 
-				camera.aspect = window.innerWidth / window.innerHeight;
-				camera.updateProjectionMatrix();
+                        }, onProgress, onError );
 
-				renderer.setSize( window.innerWidth, window.innerHeight );
+                        //
 
-			}
+                        /* Renderer */
+                        renderer = new THREE.WebGLRenderer();
+                        renderer.setPixelRatio(window.devicePixelRatio);
+                        renderer.setSize(window.innerWidth, window.innerHeight);
+                        renderer.setClearColor(new THREE.Color("hsl(0, 0%, 98%)"));
+                        container.appendChild(renderer.domElement);
+                        //document.addEventListener( 'mousewheel', onDocumentMouseWheel, false );
 
-            function onDocumentMouseWheel( event ) {
+                        //
 
-                fov -= event.wheelDeltaY * 0.1;
-                camera.projectionMatrix = THREE.Matrix4.makePerspective( fov, window.innerWidth / window.innerHeight, 1, 100 );
-                camera.updateProjectionMatrix();
+                        window.addEventListener( 'resize', onWindowResize, false );
 
-            }
-			//
+                        /* Controls */
+                        controls = new THREE.OrbitControls(camera, renderer.domElement);
+                        controls.enableDamping = false;
+                        controls.dampingFactor = 0.4;
+                        controls.enableZoom = true;
 
-			function animate() {
+                    }
 
-				requestAnimationFrame( animate );
-				render();
+                    function onWindowResize() {
 
-			}
+                        windowHalfX = window.innerWidth / 2;
+                        windowHalfY = window.innerHeight / 2;
 
-			function render() {
+                        camera.aspect = window.innerWidth / window.innerHeight;
+                        camera.updateProjectionMatrix();
 
-                controls.update();
-				renderer.render( scene, camera );
+                        renderer.setSize( window.innerWidth, window.innerHeight );
 
-			}
+                    }
 
-            function getURLParameter(name) {
-                return decodeURIComponent((new RegExp('[?|&]' + name + '=' + '([^&;]+?)(&|#|;|$)').exec(location.search) || [null, ''])[1].replace(/\+/g, '%20')) || "";
-            }
+                    function onDocumentMouseWheel( event ) {
 
-		</script>
+                        fov -= event.wheelDeltaY * 0.1;
+                        camera.projectionMatrix = THREE.Matrix4.makePerspective( fov, window.innerWidth / window.innerHeight, 1, 100 );
+                        camera.updateProjectionMatrix();
+
+                    }
+                    //
+
+                    function animate() {
+
+                        requestAnimationFrame( animate );
+                        render();
+
+                    }
+
+                    function render() {
+
+                        controls.update();
+                        renderer.render( scene, camera );
+
+                    }
+
+                    function getURLParameter(name) {
+                        return decodeURIComponent((new RegExp('[?|&]' + name + '=' + '([^&;]+?)(&|#|;|$)').exec(location.search) || [null, ''])[1].replace(/\+/g, '%20')) || "";
+                    }
+
+				</script>
+			</div>
+			<div class="tab-pane" id="tab2">
+				<div class="container">
+					<h4>Information about file</h4>
+				</div>
+
+			</div>
+			<div class="tab-pane" id="tab3">
+				<br>
+				<div class="container" align="center">
+					<button type="button" class="btn btn-primary">Download</button>
+				</div>
+
+			</div>
+			<div class="tab-pane" id="tab4">
+				<br>
+				<div class="container" align="center">
+					<button type="button" class="btn btn-primary">Delete</button>
+				</div>
+
+			</div>
+		</div>
+	</div>
+
+
 
 	</body>
 </html>

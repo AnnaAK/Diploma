@@ -24,13 +24,25 @@
 </head>
 
 <body class="gray-bg">
+<div th:replace="fragments/header :: header">
+  <div class="navbar navbar-inverse navbar-fixed-top">
+    <div class="container">
+      <div class="navbar-header">
+        <a class="navbar-brand" href="#">Static header</a>
+      </div>
+      <div class="navbar-collapse collapse">
+        <ul class="nav navbar-nav">
+          <li class="active"><a href="#">Home</a></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
 
   <div class="middle-box text-center loginscreen animated fadeInDown">
     <div>
-      
-      <hr />
 
-      <h4>New User Registration</h4>
+      <h4>Registration</h4>
 
       <form autocomplete="off" action="#" th:action="@{/register}"
         th:object="${user}" method="post" class="m-t" role="form"

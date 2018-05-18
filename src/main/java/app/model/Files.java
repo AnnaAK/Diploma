@@ -29,8 +29,8 @@ public class Files {
     private String key;
     @Column(name="texture_url")
     private String texture_link;
-    @Column(name="texture_key")
-    private String texture_key;
+    @Column(name="extension")
+    private String extension;
 
     public int getId() {
         return id;
@@ -62,10 +62,8 @@ public class Files {
     public void setTLink(String texture_link) {
         this.texture_link = texture_link;
     }
-    public String getTKey() {
-        return texture_key;
-    }
-    public void setTKey(String texture_key) {
-        this.texture_key = texture_key;
+    public String getExtension() { return extension; }
+    public void setExtension(String extension) {
+        this.extension = extension;
     }
 }

@@ -48,20 +48,6 @@ public class AmazonS3Controller {
         this.s3client = s3client;
     }
 
-    /*@RequestMapping(value = "/storage", method = RequestMethod.GET)
-    public ModelAndView uploadpage(ModelAndView modelAndView){
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        User user = userService.findByEmail(auth.getName());
-        Set<Files> listfiles = user.getFiles();
-        modelAndView.setViewName("storage");
-        return modelAndView;
-
-    }*/
-
-    /*public ModelAndView uploadpage(ModelAndView modelAndView, MultipartFile file){
-        modelAndView.setViewName("storage");
-        return modelAndView;
-    }*/
     @RequestMapping(value = "/upload", method = RequestMethod.GET)
     public String index() {
         return "upload";
@@ -80,6 +66,7 @@ public class AmazonS3Controller {
                 try {
                     Files f = fileRepository.findFirstByName(t.getName());
                     f.setTLink(t.getUrl());
+                    f.setExtension("mtl");
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -87,11 +74,13 @@ public class AmazonS3Controller {
                 Files img = s3client.saveFileToS3(file);
                 try {
                     texture = textureRepository.findFirstByTname(img.getName()).getUrl();
+                    img.setExtension("mtl");
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
                 finally {
                     img.setTLink(texture);
+                    if (texture.equals("")) {img.setExtension("obj");}
                     fileRepository.save(img);
                     Authentication auth = SecurityContextHolder.getContext().getAuthentication();
                     User user = userService.findByEmail(auth.getName());
@@ -100,6 +89,7 @@ public class AmazonS3Controller {
                 }
             } else {
                 Files img = s3client.saveFileToS3(file);
+                img.setExtension("img");
                 fileRepository.save(img);
                 Authentication auth = SecurityContextHolder.getContext().getAuthentication();
                 User user = userService.findByEmail(auth.getName());
@@ -107,7 +97,8 @@ public class AmazonS3Controller {
                 userRepository.save(user);
             }
         }
-        return "done";
+        System.out.print("DONE!");
+        return "repo";
     }
 
     @RequestMapping(value = "/download", method = RequestMethod.GET)

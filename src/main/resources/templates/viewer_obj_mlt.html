@@ -1,135 +1,185 @@
 <!DOCTYPE html>
-<html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org/">
 <head>
-
-	<title>3D model obj+ mlt</title>
-
+	<title>OBJ loader</title>
 	<meta charset="utf-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1">
-
-	<script src="js/three.js"></script>
-	<script src="js/OBJLoader.js"></script>
-	<script src="js/OrbitControls.js"></script>
-	<script src="js/Detector.js"></script>
-	<script src="js/MTLLoader.js"></script>
-
-	<style>
-		body {
-			overflow: hidden;
-			margin: 0;
-			padding: 0;
-			background: hsl(0, 0%, 10%);
-		}
-	</style>
-
+	<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+	<link href="css/core.css" rel="stylesheet" media="screen" th:href="@{/css/core.css}" />
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
 </head>
+
 <body>
 
-<script>
+<div th:replace="fragments/header :: header">
+	<div class="navbar navbar-inverse navbar-fixed-top">
+		<div class="container">
+			<div class="navbar-header">
+				<a class="navbar-brand" href="#">Static header</a>
+			</div>
+			<div class="navbar-collapse collapse">
+				<ul class="nav navbar-nav">
+					<li class="active"><a href="#">Home</a></li>
+				</ul>
+			</div>
+		</div>
+	</div>
+</div>
 
-    if (!Detector.webgl) {
-        Detector.addGetWebGLMessage();
-    }
+<div class="tabbable">
+	<div class="container"><ul class="nav nav-tabs">
+		<li class="active"><a href="#tab1" data-toggle="tab">Demonstration</a></li>
+		<li><a href="#tab2" data-toggle="tab">Information</a></li>
+		<li><a href="#tab3" data-toggle="tab">Download</a></li>
+		<li><a href="#tab4" data-toggle="tab">Delete</a></li>
+	</ul>
+	</div>
+	<div class="tab-content">
+		<div class="tab-pane active" id="tab1">
 
-    var container;
+			<script src="js/three.js"></script>
+			<script src="js/OBJLoader.js"></script>
+			<script src="js/OrbitControls.js"></script>
+			<script src="js/Detector.js"></script>
+			<script src="js/MTLLoader.js"></script>
 
-    var camera, controls, scene, renderer;
-    var lighting, ambient, keyLight, fillLight, backLight;
+			<script>
 
-    init();
-    animate();
+                if (!Detector.webgl) {
+                    Detector.addGetWebGLMessage();
+                }
 
-    function init() {
+                var container;
 
-        container = document.createElement('div');
-        document.body.appendChild(container);
+                var camera, controls, scene, renderer;
+                var lighting, ambient, keyLight, fillLight, backLight;
 
-       //camera
+                var file = getURLParameter('file');
+                var f_texture = getURLParameter('f_texture');
 
-        camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 1000);
-        camera.position.z = 3;
+                init();
+                animate();
 
-        //scene
+                function init() {
 
-        scene = new THREE.Scene();
-        lighting = false;
+                    container = document.createElement('div');
+                    document.body.appendChild(container);
 
-        ambient = new THREE.AmbientLight(0xffffff, 1.0);
-        scene.add(ambient);
+                    //camera
 
-        keyLight = new THREE.DirectionalLight(new THREE.Color('hsl(30, 100%, 75%)'), 1.0);
-        keyLight.position.set(-100, 0, 100);
+                    camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 1000);
+                    camera.position.z = 3;
 
-        fillLight = new THREE.DirectionalLight(new THREE.Color('hsl(240, 100%, 75%)'), 0.75);
-        fillLight.position.set(100, 0, 100);
+                    //scene
 
-        backLight = new THREE.DirectionalLight(0xffffff, 1.0);
-        backLight.position.set(100, 0, -100).normalize();
+                    scene = new THREE.Scene();
+                    lighting = false;
 
-        // model
+                    ambient = new THREE.AmbientLight(0xffffff, 1.0);
+                    scene.add(ambient);
 
-        var mtlLoader = new THREE.MTLLoader();
-        mtlLoader.setPath('ex/');
-        mtlLoader.load('female-croupier-2013-03-26.mtl', function (materials) {
+                    keyLight = new THREE.DirectionalLight(new THREE.Color('hsl(30, 100%, 75%)'), 1.0);
+                    keyLight.position.set(-100, 0, 100);
 
-            materials.preload();
+                    fillLight = new THREE.DirectionalLight(new THREE.Color('hsl(240, 100%, 75%)'), 0.75);
+                    fillLight.position.set(100, 0, 100);
 
-            var objLoader = new THREE.OBJLoader();
-            objLoader.setMaterials(materials);
-            objLoader.setPath('ex/');
-            objLoader.load('female-croupier-2013-03-26.obj', function (object) {
+                    backLight = new THREE.DirectionalLight(0xffffff, 1.0);
+                    backLight.position.set(100, 0, -100).normalize();
 
-                scene.add(object);
+                    // model
 
-            });
+                    var mtlLoader = new THREE.MTLLoader();
+                    mtlLoader.setCrossOrigin(true);
+                    mtlLoader.setTexturePath ( "https://s3.amazonaws.com/medicappstorage/test/" );
+                    mtlLoader.load(f_texture, function (materials) {
 
-        });
+                        materials.preload();
 
-        //render
+                        var objLoader = new THREE.OBJLoader();
+                        objLoader.setMaterials(materials);
+                        objLoader.load(file, function (object) {
 
-        renderer = new THREE.WebGLRenderer();
-        renderer.setPixelRatio(window.devicePixelRatio);
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        renderer.setClearColor(new THREE.Color("hsl(0, 0%, 10%)"));
+                            scene.add(object);
 
-        container.appendChild(renderer.domElement);
+                        });
 
-        // controls
+                    });
 
-        controls = new THREE.OrbitControls(camera, renderer.domElement);
-        controls.enableDamping = true;
-        controls.dampingFactor = 0.25;
-        controls.enableZoom = true;
+                    //render
 
-        //events
+                    renderer = new THREE.WebGLRenderer();
+                    renderer.setPixelRatio(window.devicePixelRatio);
+                    renderer.setSize(window.innerWidth, window.innerHeight);
+                    renderer.setClearColor(new THREE.Color("hsl(0, 0%, 98%)"));
 
-        window.addEventListener('resize', onWindowResize, false);
+                    container.appendChild(renderer.domElement);
 
-    }
+                    // controls
 
-    function onWindowResize() {
+                    controls = new THREE.OrbitControls(camera, renderer.domElement);
+                    controls.enableDamping = true;
+                    controls.dampingFactor = 0.25;
+                    controls.enableZoom = true;
 
-        camera.aspect = window.innerWidth / window.innerHeight;
-        camera.updateProjectionMatrix();
+                    //events
 
-        renderer.setSize(window.innerWidth, window.innerHeight);
+                    window.addEventListener('resize', onWindowResize, false);
 
-    }
+                }
 
-    function animate() {
+                function onWindowResize() {
 
-        requestAnimationFrame(animate);
-        controls.update();
-        render();
-    }
+                    camera.aspect = window.innerWidth / window.innerHeight;
+                    camera.updateProjectionMatrix();
 
-    function render() {
+                    renderer.setSize(window.innerWidth, window.innerHeight);
 
-        renderer.render(scene, camera);
+                }
 
-    }
+                function animate() {
 
-</script>
+                    requestAnimationFrame(animate);
+                    controls.update();
+                    render();
+                }
+
+                function render() {
+
+                    renderer.render(scene, camera);
+
+                }
+                function getURLParameter(name) {
+                    return decodeURIComponent((new RegExp('[?|&]' + name + '=' + '([^&;]+?)(&|#|;|$)').exec(location.search) || [null, ''])[1].replace(/\+/g, '%20')) || "";
+                }
+
+			</script>
+		</div>
+		<div class="tab-pane" id="tab2">
+			<div class="container">
+				<h4>Information about file</h4>
+			</div>
+
+		</div>
+		<div class="tab-pane" id="tab3">
+			<br>
+			<div class="container" align="center">
+				<button type="button" class="btn btn-primary">Download</button>
+			</div>
+
+		</div>
+		<div class="tab-pane" id="tab4">
+			<br>
+			<div class="container" align="center">
+				<button type="button" class="btn btn-primary">Delete</button>
+			</div>
+
+		</div>
+	</div>
+</div>
+
+
 
 </body>
 </html>
