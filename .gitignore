@@ -2,3 +2,4 @@
 target/
 *.iml
 src/test/
+src/main/resources/application.properties
